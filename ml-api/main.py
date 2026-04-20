@@ -19,6 +19,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def health_check():
+    return {"status": "healthy", "service": "ml-api"}
+
 # ---------------------------------------------------------
 # ML Model Initialization & Training (Demo / Startup)
 # ---------------------------------------------------------
