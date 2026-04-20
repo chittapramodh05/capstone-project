@@ -24,7 +24,7 @@ pipeline {
 
         stage('Build Docker Images') {
             steps {
-                echo 'Building Docker images for Backend and Frontend...'
+                echo 'Building Docker images for ML API, Backend, and Frontend...'
                 bat "${COMPOSE_EXE} build"
             }
         }
@@ -52,6 +52,9 @@ pipeline {
                 
                 echo 'Verifying frontend response...'
                 bat 'curl -f http://localhost:5173 || exit 1'
+                
+                echo 'Verifying ml-api response...'
+                bat 'curl -f http://localhost:8000/ || exit 1'
             }
         }
     }

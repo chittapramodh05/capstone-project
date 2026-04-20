@@ -11,6 +11,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState("");
   const [error, setError] = useState("");
   const [containmentStatus, setContainmentStatus] = useState<{ [key: string]: string }>({});
   const [toastMsg, setToastMsg] = useState("");
@@ -44,17 +45,24 @@ export default function Dashboard() {
     if (!token) return navigate("/");
 
     setLoading(true);
+    setLoadingText("Ingesting dataset...");
     setError("");
 
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
 
+      const t1 = setTimeout(() => setLoadingText("Running ML analysis..."), 800);
+      const t2 = setTimeout(() => setLoadingText("Generating threat intelligence..."), 2000);
+
       const response = await axios.post(
         "http://localhost:5000/api/threats/upload",
         formData,
-        { headers: { Authorization: `Bearer ${token} `, "Content-Type": "multipart/form-data" } }
+        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
       );
+      
+      clearTimeout(t1);
+      clearTimeout(t2);
 
       setStats(response.data.stats);
       setDetailedThreats(response.data.detailedThreats);
@@ -135,9 +143,9 @@ export default function Dashboard() {
               <button
                 onClick={handleUpload}
                 disabled={loading}
-                className={`analyze - btn ${loading ? 'loading' : ''} `}
+                className={`analyze-btn ${loading ? 'loading' : ''}`}
               >
-                {loading ? "INITIALIZING SIMULATION..." : "RUN ANALYSIS"}
+                {loading ? loadingText : "RUN ANALYSIS"}
               </button>
             </div>
             {error && <div className="error-banner">{error}</div>}
@@ -206,6 +214,8 @@ export default function Dashboard() {
                     <th>Threat ID</th>
                     <th>Attack Vector</th>
                     <th>Severity</th>
+                    <th>Confidence</th>
+                    <th>AI Context</th>
                     <th>Source IP</th>
                     <th>Target Asset</th>
                     <th>Action Workflow</th>
@@ -217,6 +227,8 @@ export default function Dashboard() {
                       <td className="font-mono">{threat.id}</td>
                       <td className="font-bold">{threat.attackType}</td>
                       <td><span className={`severity-pill pill-${threat.severity.toLowerCase()}`}>{threat.severity}</span></td>
+                      <td className="font-mono text-glow-blue">{threat.probability || 'N/A'}</td>
+                      <td className="text-sm italic" style={{color: '#94a3b8', maxWidth: '200px'}}>{threat.reason || 'Standard classification'}</td>
                       <td className="font-mono text-glow-red">{threat.sourceIp}</td>
                       <td className="font-bold">{threat.targetAsset}</td>
                       <td>
