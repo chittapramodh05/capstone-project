@@ -4,6 +4,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 
 export default function App() {
+  // Main Application Router Setup
   return (
     <Router>
       <Routes>
